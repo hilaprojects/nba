@@ -1,0 +1,77 @@
+syntax = "proto3";
+option go_package = "./;pb";
+package pb;
+
+
+
+service PlayerGameService {
+  rpc LogPlayerGame (LogPlayerGameRequest) returns (LogGameResponse);
+  rpc GetPlayersGameStats (GetPlayersGameStatsRequest) returns (PlayersGameStatsResponse);
+  rpc GetTeamSeasonStats (GetTeamsSeasonStatsRequest) returns (TeamsSeasonStatsResponse);
+}
+
+message PlayerGameStat {
+  int32 points = 1;
+  int32 rebounds = 2;
+  int32 assists = 3;
+  int32 steals = 4;
+  int32 blocks = 5;
+  int32 fouls = 6;
+  int32 turnovers = 7;
+  float minutes_played = 8;
+  int32 player_id = 9;
+}
+
+message LogGameResponse {
+  string message = 1;
+  bool success = 2;
+}
+
+message LogPlayerGameRequest {
+  int32 player_id = 1;
+  int32 game_id = 2;
+  int32 points = 3;
+  int32 rebounds = 4;
+  int32 assists = 5;
+  int32 steals = 6;
+  int32 blocks = 7;
+  int32 fouls = 8;
+  int32 turnovers = 9;
+  float minutes_played = 10;
+}
+
+// Request structure for GetPlayerGameStats
+message GetPlayersGameStatsRequest {
+    int32 page_number = 1;  // The page number to fetch
+    int32 page_size = 2;    // The number of records per page
+}
+
+// Response structure for GetPlayerGameStats
+message PlayersGameStatsResponse {
+    repeated PlayerGameStat player_game_stats = 1;  // List of PlayerGameStat objects
+    int64 total_count = 2;  // Total count of records
+}
+
+message TeamSeasonStats {
+  int32 points = 1;
+  int32 rebounds = 2;
+  int32 assists = 3;
+  int32 steals = 4;
+  int32 blocks = 5;
+  int32 fouls = 6;
+  int32 turnovers = 7;
+  float minutes_played = 8;
+    int32 team_id = 9;
+}
+
+message GetTeamsSeasonStatsRequest {
+    int32 page_number = 1;  // The page number to fetch
+    int32 page_size = 2;    // The number of records per page
+}
+
+message TeamsSeasonStatsResponse {
+    repeated TeamSeasonStats team_season_stats = 1;  // List of TeamSeasonStats objects
+    int32 total_count = 2;  // Total count of records
+}
+
+
