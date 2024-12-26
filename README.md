@@ -2,10 +2,11 @@
  Home Assignment
 
 
-To Improve:
-Implement a simple cache using a map and an ID (either player or team) to retrieve player or team stats from the cache instead of querying the database.
+### **To Improve:**
 
-Add a simple counter to track the players we want to log, and save them in bulk rather than saving them one by one.
+1. **Implement a simple cache** using a map and an ID (either player or team) to retrieve player or team stats from the cache instead of querying the database.
+   
+2. **Add a simple counter** to track the players we want to log, and save them in bulk rather than saving them one by one.
 
 
 
