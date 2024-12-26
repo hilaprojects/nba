@@ -2,12 +2,31 @@ syntax = "proto3";
 option go_package = "./;pb";
 package pb;
 
+import "google/api/annotations.proto";
 
 
 service PlayerGameService {
-  rpc LogPlayerGame (LogPlayerGameRequest) returns (LogGameResponse);
-  rpc GetPlayersGameStats (GetPlayersGameStatsRequest) returns (PlayersGameStatsResponse);
-  rpc GetTeamSeasonStats (GetTeamsSeasonStatsRequest) returns (TeamsSeasonStatsResponse);
+  rpc GetPlayer(GetPlayerRequest) returns (GetPlayerResponse){
+    option (google.api.http) = {
+      get: "/api/v1/player_game/{player_id}"
+    };
+  }
+  rpc LogPlayerGame (LogPlayerGameRequest) returns (LogGameResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/player_game"
+      body: "*"
+    };
+  };
+  rpc GetPlayerGameSeasonStats (GetPlayerGameSeasonStatsRequest) returns (PlayerGameSeasonStatsResponse){
+    option (google.api.http) = {
+      get: "/api/v1/player_game/seasons/{season}/players/{player_id}"
+    };
+  }
+  rpc GetTeamSeasonStats (GetTeamsSeasonStatsRequest) returns (TeamsSeasonStatsResponse){
+    option (google.api.http) = {
+      get: "/api/v1/team_game/seasons/{season}/teams/{team_id}"
+    };
+  }
 }
 
 message PlayerGameStat {
@@ -22,11 +41,17 @@ message PlayerGameStat {
   int32 player_id = 9;
 }
 
+message GetPlayerRequest {
+  int32 player_id = 1;
+}
 message LogGameResponse {
   string message = 1;
   bool success = 2;
 }
-
+message GetPlayerResponse {
+  string message = 1;
+  bool success = 2;
+}
 message LogPlayerGameRequest {
   int32 player_id = 1;
   int32 game_id = 2;
@@ -41,15 +66,14 @@ message LogPlayerGameRequest {
 }
 
 // Request structure for GetPlayerGameStats
-message GetPlayersGameStatsRequest {
-    int32 page_number = 1;  // The page number to fetch
-    int32 page_size = 2;    // The number of records per page
+message GetPlayerGameSeasonStatsRequest {
+    int32 player_id = 1;    // The player ID
+    int32 season = 2;    // The season ID
 }
 
 // Response structure for GetPlayerGameStats
-message PlayersGameStatsResponse {
-    repeated PlayerGameStat player_game_stats = 1;  // List of PlayerGameStat objects
-    int64 total_count = 2;  // Total count of records
+message PlayerGameSeasonStatsResponse {
+    PlayerGameStat player_game_stats = 1;  // List of PlayerGameStat objects
 }
 
 message TeamSeasonStats {
@@ -61,17 +85,16 @@ message TeamSeasonStats {
   int32 fouls = 6;
   int32 turnovers = 7;
   float minutes_played = 8;
-    int32 team_id = 9;
+  int32 team_id = 9;
 }
 
 message GetTeamsSeasonStatsRequest {
-    int32 page_number = 1;  // The page number to fetch
-    int32 page_size = 2;    // The number of records per page
+    int32 season = 1;    // The season
+    int32 team_id = 2;    // The team ID
 }
 
 message TeamsSeasonStatsResponse {
-    repeated TeamSeasonStats team_season_stats = 1;  // List of TeamSeasonStats objects
-    int32 total_count = 2;  // Total count of records
+    TeamSeasonStats team_season_stats = 1;  // List of TeamSeasonStats objects
 }
 
 

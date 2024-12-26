@@ -43,31 +43,32 @@ func (t *GRPCServer) LogPlayerGame(ctx context.Context, req *pb.LogPlayerGameReq
 }
 
 // Implement the GetPlayersGameStats method
-func (t *GRPCServer) GetPlayersGameStats(ctx context.Context, request *pb.GetPlayersGameStatsRequest) (*pb.PlayersGameStatsResponse, error) {
-	log.Println("Received GetPlayersGameStats request", request)
-	p, c, err := t.Svc.GetPlayerSeasonAverages(ctx, model.GetPlayersGameStatsRequest{
-		PageSize:   int(request.PageSize),
-		PageNumber: int(request.PageNumber),
+func (t *GRPCServer) GetPlayerGameSeasonStats(ctx context.Context, request *pb.GetPlayerGameSeasonStatsRequest) (*pb.PlayerGameSeasonStatsResponse, error) {
+	log.Println("Received GetPlayerGameSeasonStats request", request)
+	player, err := t.Svc.GetPlayerSeasonAverages(ctx, model.GetPlayerGameStatsRequest{
+		PlayerID:   int(request.PlayerId),
+		SeasonYear: int(request.Season),
 	})
 	if err != nil {
 		return nil, err
 	}
-	var playerStats []*pb.PlayerGameStat
-	if p != nil {
-		for _, player := range p {
-			playerStats = append(playerStats, &pb.PlayerGameStat{
-				Points:        int32(player.PointsPerGame),
-				Assists:       int32(player.AssistsPerGame),
-				Rebounds:      int32(player.ReboundsPerGame),
-				Steals:        int32(player.StealsPerGame),
-				Blocks:        int32(player.BlocksPerGame),
-				Turnovers:     int32(player.TurnoversPerGame),
-				Fouls:         int32(player.FoulsPerGame),
-				MinutesPlayed: player.MinutesPlayedPerGame,
-				PlayerId:      int32(player.PlayerID),
-			})
-		}
+	playerStats := pb.PlayerGameStat{
+		Points:        int32(player.PointsPerGame),
+		Assists:       int32(player.AssistsPerGame),
+		Rebounds:      int32(player.ReboundsPerGame),
+		Steals:        int32(player.StealsPerGame),
+		Blocks:        int32(player.BlocksPerGame),
+		Turnovers:     int32(player.TurnoversPerGame),
+		Fouls:         int32(player.FoulsPerGame),
+		MinutesPlayed: player.MinutesPlayedPerGame,
+		PlayerId:      int32(player.PlayerID),
 	}
-	return &pb.PlayersGameStatsResponse{PlayerGameStats: playerStats, TotalCount: c}, nil
 
+	return &pb.PlayerGameSeasonStatsResponse{PlayerGameStats: &playerStats}, nil
+
+}
+
+func (t *GRPCServer) GetPlayer(ctx context.Context, request *pb.GetPlayerRequest) (*pb.GetPlayerResponse, error) {
+	log.Println("Received GetPlayerGameStats request", request)
+	return &pb.GetPlayerResponse{Message: "cool", Success: true}, nil
 }

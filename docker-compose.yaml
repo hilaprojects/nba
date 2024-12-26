@@ -1,33 +1,50 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile.yaml
-    ports:
-      - "8080:8080" # Map host port to container port
-    volumes:
-      - .:/app # Optional: bind your project directory for local development
-    depends_on:
-      - db # Ensure the database starts first
-    environment:
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=password
-      - DB_NAME=nba
-
   db:
-    image: postgres:15
-    ports:
-      - "5432:5432"
+    image: postgres:13
+    container_name: db
     environment:
-      POSTGRES_USER: youruser
-      POSTGRES_PASSWORD: yourpassword
-      POSTGRES_DB: yourdb
+      POSTGRES_USER: postgres       # Explicit PostgreSQL user
+      POSTGRES_PASSWORD: password   # Explicit PostgreSQL password
+      POSTGRES_DB: nba                   # Explicit PostgreSQL database
     volumes:
       - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
+
+  app:
+    build: .
+    container_name: app
+    environment:
+      DB_USER: postgres          # Match the explicit user name for DB
+      DB_PASSWORD: password      # Match the explicit password
+      DB_HOST: db                     # Use the service name of the db container
+      DB_PORT: 5432                   # Explicit DB port
+      DB_NAME: nba                     # Explicit DB name
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "50051:50051"
+      - "8080:8080"  # Change this line to expose port 8080
+
+    networks:
+      - app-network
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   db_data:
+    driver: local

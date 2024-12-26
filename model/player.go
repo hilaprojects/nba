@@ -1,15 +1,31 @@
 package model
 
 type Player struct {
-	Id     int              `gorm:"primaryKey;autoIncrement"` // Primary key with auto-increment
-	Name   string           `gorm:"type:varchar(100);not null"`
-	TeamID int              `gorm:"not null;index;constraint:OnDelete:CASCADE"`                       // Foreign key for the relationship with Team, with cascade delete
-	Games  []PlayerGameStat `gorm:"foreignKey:PlayerID;constraint:OnUpdate:CASCADE,onDelete:CASCADE"` // One-to-many relationship with cascade delete
+	Id            int
+	Name          string
+	CurrentTeamID int
+	Games         []PlayerGameStats
 }
 
-type PlayerGameStat struct {
-	PlayerID      int // Foreign key for the relationship with Player
-	GameID        int // Foreign key for the relationship with Game
+type Season struct {
+	Id   int
+	Year string
+}
+type Game struct {
+	Id       int
+	TeamAID  int
+	TeamBID  int
+	SeasonID int
+}
+type Team struct {
+	Id   int
+	Name string
+}
+
+type PlayerGameStats struct {
+	PlayerID      int
+	PlayerName    string
+	GameID        int
 	Points        int
 	Assists       int
 	Rebounds      int
@@ -19,18 +35,10 @@ type PlayerGameStat struct {
 	Fouls         int
 	MinutesPlayed float32
 }
-type Game struct {
-	Id   int    `gorm:"primaryKey;autoIncrement"` // Primary key with auto-increment
-	Date string `gorm:"type:date;not null"`       // Date of the game
-	Team []Team `gorm:"many2many:game_teams"`     // Many-to-many relationship with Team
-}
-type Team struct {
-	Id   int    `gorm:"primaryKey;autoIncrement"`          // Primary key with auto-increment
-	Name string `gorm:"type:varchar(100);unique;not null"` // Unique team name
-}
 type PlayerSeasonAverage struct {
 	PlayerID             int
-	TeamID               int
+	PlayerName           string
+	Season               int
 	PointsPerGame        float32
 	AssistsPerGame       float32
 	ReboundsPerGame      float32
@@ -44,6 +52,7 @@ type PlayerSeasonAverage struct {
 type TeamSeasoAverage struct {
 	TeamName             string
 	TeamID               int
+	Season               int
 	PointsPerGame        float32
 	AssistsPerGame       float32
 	ReboundsPerGame      float32
@@ -54,18 +63,22 @@ type TeamSeasoAverage struct {
 	MinutesPlayedPerGame float32
 }
 
-type GetPlayersGameStatsRequest struct {
+type GetPlayerGameStatsRequest struct {
 	PageSize   int
 	PageNumber int
+	SeasonYear int
+	PlayerID   int
 }
 
-type GetPlayersGameStatsResponse struct {
+type GetPlayerGameStatsResponse struct {
 	PlayerStats []PlayerSeasonAverage
 }
 
-type GetTeamsGameStatsRequest struct {
+type GetTeamGameStatsRequest struct {
 	PageSize   int
 	PageNumber int
+	TeamID     int
+	SeasonYear int
 }
 
 type GetTeamsGameStatsResponse struct {

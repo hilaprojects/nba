@@ -19,17 +19,19 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PlayerGameService_LogPlayerGame_FullMethodName       = "/pb.PlayerGameService/LogPlayerGame"
-	PlayerGameService_GetPlayersGameStats_FullMethodName = "/pb.PlayerGameService/GetPlayersGameStats"
-	PlayerGameService_GetTeamSeasonStats_FullMethodName  = "/pb.PlayerGameService/GetTeamSeasonStats"
+	PlayerGameService_GetPlayer_FullMethodName                = "/pb.PlayerGameService/GetPlayer"
+	PlayerGameService_LogPlayerGame_FullMethodName            = "/pb.PlayerGameService/LogPlayerGame"
+	PlayerGameService_GetPlayerGameSeasonStats_FullMethodName = "/pb.PlayerGameService/GetPlayerGameSeasonStats"
+	PlayerGameService_GetTeamSeasonStats_FullMethodName       = "/pb.PlayerGameService/GetTeamSeasonStats"
 )
 
 // PlayerGameServiceClient is the client API for PlayerGameService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PlayerGameServiceClient interface {
+	GetPlayer(ctx context.Context, in *GetPlayerRequest, opts ...grpc.CallOption) (*GetPlayerResponse, error)
 	LogPlayerGame(ctx context.Context, in *LogPlayerGameRequest, opts ...grpc.CallOption) (*LogGameResponse, error)
-	GetPlayersGameStats(ctx context.Context, in *GetPlayersGameStatsRequest, opts ...grpc.CallOption) (*PlayersGameStatsResponse, error)
+	GetPlayerGameSeasonStats(ctx context.Context, in *GetPlayerGameSeasonStatsRequest, opts ...grpc.CallOption) (*PlayerGameSeasonStatsResponse, error)
 	GetTeamSeasonStats(ctx context.Context, in *GetTeamsSeasonStatsRequest, opts ...grpc.CallOption) (*TeamsSeasonStatsResponse, error)
 }
 
@@ -39,6 +41,16 @@ type playerGameServiceClient struct {
 
 func NewPlayerGameServiceClient(cc grpc.ClientConnInterface) PlayerGameServiceClient {
 	return &playerGameServiceClient{cc}
+}
+
+func (c *playerGameServiceClient) GetPlayer(ctx context.Context, in *GetPlayerRequest, opts ...grpc.CallOption) (*GetPlayerResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPlayerResponse)
+	err := c.cc.Invoke(ctx, PlayerGameService_GetPlayer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *playerGameServiceClient) LogPlayerGame(ctx context.Context, in *LogPlayerGameRequest, opts ...grpc.CallOption) (*LogGameResponse, error) {
@@ -51,10 +63,10 @@ func (c *playerGameServiceClient) LogPlayerGame(ctx context.Context, in *LogPlay
 	return out, nil
 }
 
-func (c *playerGameServiceClient) GetPlayersGameStats(ctx context.Context, in *GetPlayersGameStatsRequest, opts ...grpc.CallOption) (*PlayersGameStatsResponse, error) {
+func (c *playerGameServiceClient) GetPlayerGameSeasonStats(ctx context.Context, in *GetPlayerGameSeasonStatsRequest, opts ...grpc.CallOption) (*PlayerGameSeasonStatsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PlayersGameStatsResponse)
-	err := c.cc.Invoke(ctx, PlayerGameService_GetPlayersGameStats_FullMethodName, in, out, cOpts...)
+	out := new(PlayerGameSeasonStatsResponse)
+	err := c.cc.Invoke(ctx, PlayerGameService_GetPlayerGameSeasonStats_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -75,8 +87,9 @@ func (c *playerGameServiceClient) GetTeamSeasonStats(ctx context.Context, in *Ge
 // All implementations must embed UnimplementedPlayerGameServiceServer
 // for forward compatibility.
 type PlayerGameServiceServer interface {
+	GetPlayer(context.Context, *GetPlayerRequest) (*GetPlayerResponse, error)
 	LogPlayerGame(context.Context, *LogPlayerGameRequest) (*LogGameResponse, error)
-	GetPlayersGameStats(context.Context, *GetPlayersGameStatsRequest) (*PlayersGameStatsResponse, error)
+	GetPlayerGameSeasonStats(context.Context, *GetPlayerGameSeasonStatsRequest) (*PlayerGameSeasonStatsResponse, error)
 	GetTeamSeasonStats(context.Context, *GetTeamsSeasonStatsRequest) (*TeamsSeasonStatsResponse, error)
 	mustEmbedUnimplementedPlayerGameServiceServer()
 }
@@ -88,11 +101,14 @@ type PlayerGameServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPlayerGameServiceServer struct{}
 
+func (UnimplementedPlayerGameServiceServer) GetPlayer(context.Context, *GetPlayerRequest) (*GetPlayerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPlayer not implemented")
+}
 func (UnimplementedPlayerGameServiceServer) LogPlayerGame(context.Context, *LogPlayerGameRequest) (*LogGameResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LogPlayerGame not implemented")
 }
-func (UnimplementedPlayerGameServiceServer) GetPlayersGameStats(context.Context, *GetPlayersGameStatsRequest) (*PlayersGameStatsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPlayersGameStats not implemented")
+func (UnimplementedPlayerGameServiceServer) GetPlayerGameSeasonStats(context.Context, *GetPlayerGameSeasonStatsRequest) (*PlayerGameSeasonStatsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPlayerGameSeasonStats not implemented")
 }
 func (UnimplementedPlayerGameServiceServer) GetTeamSeasonStats(context.Context, *GetTeamsSeasonStatsRequest) (*TeamsSeasonStatsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTeamSeasonStats not implemented")
@@ -118,6 +134,24 @@ func RegisterPlayerGameServiceServer(s grpc.ServiceRegistrar, srv PlayerGameServ
 	s.RegisterService(&PlayerGameService_ServiceDesc, srv)
 }
 
+func _PlayerGameService_GetPlayer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPlayerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayerGameServiceServer).GetPlayer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlayerGameService_GetPlayer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayerGameServiceServer).GetPlayer(ctx, req.(*GetPlayerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PlayerGameService_LogPlayerGame_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(LogPlayerGameRequest)
 	if err := dec(in); err != nil {
@@ -136,20 +170,20 @@ func _PlayerGameService_LogPlayerGame_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PlayerGameService_GetPlayersGameStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetPlayersGameStatsRequest)
+func _PlayerGameService_GetPlayerGameSeasonStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPlayerGameSeasonStatsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PlayerGameServiceServer).GetPlayersGameStats(ctx, in)
+		return srv.(PlayerGameServiceServer).GetPlayerGameSeasonStats(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PlayerGameService_GetPlayersGameStats_FullMethodName,
+		FullMethod: PlayerGameService_GetPlayerGameSeasonStats_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlayerGameServiceServer).GetPlayersGameStats(ctx, req.(*GetPlayersGameStatsRequest))
+		return srv.(PlayerGameServiceServer).GetPlayerGameSeasonStats(ctx, req.(*GetPlayerGameSeasonStatsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -180,12 +214,16 @@ var PlayerGameService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*PlayerGameServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "GetPlayer",
+			Handler:    _PlayerGameService_GetPlayer_Handler,
+		},
+		{
 			MethodName: "LogPlayerGame",
 			Handler:    _PlayerGameService_LogPlayerGame_Handler,
 		},
 		{
-			MethodName: "GetPlayersGameStats",
-			Handler:    _PlayerGameService_GetPlayersGameStats_Handler,
+			MethodName: "GetPlayerGameSeasonStats",
+			Handler:    _PlayerGameService_GetPlayerGameSeasonStats_Handler,
 		},
 		{
 			MethodName: "GetTeamSeasonStats",
